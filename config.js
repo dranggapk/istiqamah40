@@ -1,0 +1,7 @@
+/* Konfigurasi Istiqamah 40
+ * googleClientId: OAuth 2.0 Client ID (tipe "Web application") dari Google Cloud Console.
+ * Tambahkan domain tempat aplikasi di-hosting ke "Authorized JavaScript origins".
+ * Selama masih kosong, tombol Google menampilkan petunjuk dan pengguna tetap bisa lanjut tanpa akun. */
+window.APP_CONFIG = {
+  googleClientId: '',
+};

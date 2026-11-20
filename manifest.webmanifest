@@ -1,0 +1,21 @@
+{
+  "name": "Istiqamah 40 — 40 Rakaat, 1 Juz & Sedekah",
+  "short_name": "Istiqamah 40",
+  "description": "Pengingat, pencatatan, dan evaluasi challenge 40 hari: 40 rakaat shalat per hari, one day one juz, dan sedekah setiap hari.",
+  "lang": "id",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#15513A",
+  "theme_color": "#1F6F50",
+  "categories": ["lifestyle", "productivity"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Evaluasi", "url": "./#eval", "icons": [{ "src": "icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

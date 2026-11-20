@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Istiqamah 40</title>
+  <meta name="description" content="Challenge 40 hari: 40 rakaat shalat, one day one juz, dan sedekah setiap hari.">
+  <meta name="theme-color" content="#15513A">
+  <meta name="color-scheme" content="light dark">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Istiqamah 40">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="root"></div>
+
+  <dialog id="modal" aria-labelledby="modal-title">
+    <form method="dialog" class="modal-body">
+      <h2 id="modal-title"></h2>
+      <p id="modal-body"></p>
+      <button id="modal-ok" class="btn primary" type="submit">OK</button>
+    </form>
+  </dialog>
+
+  <div id="toast" role="status" aria-live="polite"></div>
+
+  <noscript>Istiqamah 40 membutuhkan JavaScript. / Istiqamah 40 requires JavaScript.</noscript>
+  <script src="config.js"></script>
+  <script src="i18n.js"></script>
+  <script src="icons.js"></script>
+  <script src="praytimes.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
