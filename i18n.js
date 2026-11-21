@@ -211,6 +211,7 @@ const I18N = {
     'prof.restore': 'Pulihkan', 'prof.restoreDesc': 'Dari berkas cadangan', 'prof.restoreBtn': 'Pilih berkas',
     'prof.reset': 'Hapus semua data', 'prof.resetDesc': 'Tidak bisa dibatalkan', 'prof.resetBtn': 'Hapus',
     'prof.resetConfirm': 'Hapus semua catatan, pengaturan, dan profil? Ini tidak bisa dibatalkan.',
+    'prof.privacy': 'Kebijakan privasi',
     'prof.about': 'Tentang Istiqamah 40', 'prof.aboutDesc': 'Inspirasi dari QS. Fatir ayat 29',
 
     // Navigasi
@@ -461,6 +462,7 @@ const I18N = {
     'prof.restore': 'Restore', 'prof.restoreDesc': 'From a backup file', 'prof.restoreBtn': 'Choose file',
     'prof.reset': 'Delete all data', 'prof.resetDesc': 'This cannot be undone', 'prof.resetBtn': 'Delete',
     'prof.resetConfirm': 'Delete all logs, settings, and your profile? This cannot be undone.',
+    'prof.privacy': 'Privacy policy',
     'prof.about': 'About Istiqamah 40', 'prof.aboutDesc': 'Inspired by Surah Fatir, verse 29',
 
     'nav.today': 'Today', 'nav.eval': 'Review', 'nav.remind': 'Reminders', 'nav.profile': 'Profile', 'nav.label': 'Main navigation',

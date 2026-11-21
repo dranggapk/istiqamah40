@@ -719,7 +719,7 @@ function viewProfile() {
     </section>
 
     <button type="button" class="about" data-action="about">${logo(44, { rounded: true })}<div><strong>${esc(t('prof.about'))}</strong><span>${esc(t('prof.aboutDesc'))}</span></div>${ic('chevron', 18)}</button>
-    <p class="muted small center">Istiqamah 40 · v${APP_VERSION}</p>`;
+    <p class="muted small center">Istiqamah 40 · v${APP_VERSION} · <a href="privacy.html">${esc(t('prof.privacy'))}</a></p>`;
 }
 
 /* ================= Kerangka aplikasi ================= */
