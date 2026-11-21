@@ -45,6 +45,22 @@ Catatan ibadah & pengaturan disimpan per akun Google, sehingga aman saat ganti H
 
 Library: `lib/supabase-js-2.49.4.js` (supabase-js UMD, lisensi MIT) disimpan di repo agar bisa di-cache offline.
 
+## Notifikasi push (Supabase Edge Function)
+Pengingat dikirim dari server sehingga tetap muncul walau aplikasi ditutup. Membutuhkan sinkronisasi cloud (login Google).
+
+**Cara kerja**
+- Perangkat berlangganan Web Push (kunci publik VAPID di `config.js`); alamatnya disimpan di `push_subscriptions` (RLS), beserta zona waktu & bahasa perangkat.
+- `pg_cron` memanggil Edge Function `send-reminders` setiap menit. Fungsi menghitung jadwal shalat tiap pengguna (kriteria Kemenag, sama persis dengan aplikasi), lalu mengirim pengingat yang jatuh tempo — dilewati bila ibadahnya sudah dicentang. Tabel `push_log` mencegah kiriman ganda.
+- Saat push aktif, pengingat lokal di aplikasi dimatikan agar tidak dobel. Keluar akun / hapus data ikut menghapus langganan.
+- iPhone: hanya setelah aplikasi ditambahkan ke Layar Utama (iOS 16.4+).
+
+**Setup** (kunci rahasia diberikan terpisah — JANGAN di-commit)
+1. SQL Editor › jalankan `supabase/push.sql` (ganti `<PROJECT_REF>` dan `<CRON_SECRET>` di bagian akhir).
+2. Edge Functions › Deploy a new function › Via Editor › nama **`send-reminders`** › tempel isi `supabase/functions/send-reminders/index.ts` › Deploy.
+3. Buka fungsi itu › Details/Settings › matikan **Verify JWT (Enforce JWT verification)** › Save.
+4. Edge Functions › Secrets: tambahkan `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`.
+5. Cek: Edge Functions › send-reminders › Logs/Invocations — muncul panggilan tiap menit dengan status 200.
+
 ## Bahasa
 Semua teks ada di `i18n.js` (`id` dan `en`, kunci identik). Untuk menambah bahasa, salin blok `en`, terjemahkan, lalu tambahkan pilihannya di layar registrasi dan Profil.
 

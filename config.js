@@ -7,5 +7,7 @@ window.APP_CONFIG = {
   // Kunci anon/publishable memang publik; keamanan data dijaga Row Level Security (supabase/schema.sql).
   supabaseUrl: 'https://tliudgeumvnkoflagizu.supabase.co',
   supabaseAnonKey: 'sb_publishable_NMX32s5CuD6BjA1yIdqQgQ_qHXJ36oJ',
+  // Kunci publik VAPID untuk notifikasi push (kunci privat hanya ada di Supabase Edge Function secrets).
+  vapidPublicKey: 'BLCgIkF2X4QqpcCCxLAe8o3kTgr_0kle5JH6MmW6zbQrwC_sZdb6JHmijktQZeMIKY1BBdZ8jlGxiHeZKQUXvxw',
   googleClientId: '62506141379-vsp1pb5j9j9rfi3fmk6ff0t9849srick.apps.googleusercontent.com',
 };

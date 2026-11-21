@@ -70,13 +70,19 @@ const Sync = (() => {
 
   async function signInWithGoogle(idToken) {
     if (!enabled()) return false;
-    await init();
-    if (!client) return false;
-    const { data, error } = await client.auth.signInWithIdToken({ provider: 'google', token: idToken, nonce: rawNonce || undefined });
-    if (error) { status.state = 'error'; status.error = error.message; render(); return false; }
-    user = data.user;
-    await syncNow();
-    return true;
+    try {
+      await init();
+      if (!client) return false;
+      const { data, error } = await client.auth.signInWithIdToken({ provider: 'google', token: idToken, nonce: rawNonce || undefined });
+      if (error) { status.state = 'error'; status.error = error.message; return false; }
+      user = data.user;
+      await syncNow();
+      return true;
+    } catch (e) {
+      // Supabase tidak terjangkau: aplikasi tetap jalan, sinkron dicoba lagi dari Profil
+      status.state = 'error'; status.error = String((e && e.message) || e);
+      return false;
+    }
   }
 
   async function signOut() {
@@ -194,6 +200,8 @@ const Sync = (() => {
   return {
     enabled, init, nonceForGoogle, signInWithGoogle, signOut, deleteCloudData, markDay, markSettings, schedule, syncNow,
     get signedIn() { return !!user; },
+    get client() { return client; },
+    get userId() { return (user && user.id) || null; },
     get email() { return (user && user.email) || ''; },
     get status() { return status; },
     get lastSync() { return (state.sync && state.sync.lastSync) || null; },

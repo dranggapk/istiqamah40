@@ -689,10 +689,11 @@ function viewRemind() {
     ${timeRow('sdT', 'sedekahTime', t('rem.sedekahTime'))}
   </section>
 
+  ${pushCard()}
   <section class="card">
-    <h2 class="h-ico">${ic('calendarPlus', 18)} ${esc(t('rem.closedTitle'))}</h2>
-    <p class="muted small">${esc(t('rem.closedBody'))}</p>
-    <div class="btn-row"><button type="button" class="btn primary grow" data-action="ics">${esc(t('rem.ics'))}</button>
+    <h2 class="h-ico">${ic('calendarPlus', 18)} ${esc(t(window.Push && Push.active ? 'push.backupTitle' : 'rem.closedTitle'))}</h2>
+    <p class="muted small">${esc(t(window.Push && Push.active ? 'push.backupBody' : 'rem.closedBody'))}</p>
+    <div class="btn-row"><button type="button" class="btn ${window.Push && Push.active ? 'ghost' : 'primary'} grow" data-action="ics">${esc(t('rem.ics'))}</button>
     <button type="button" class="btn ghost" data-action="test">${esc(t('rem.test'))}</button></div>
   </section>`;
 }
@@ -737,6 +738,17 @@ function viewProfile() {
 
     <button type="button" class="about" data-action="about">${logo(44, { rounded: true })}<div><strong>${esc(t('prof.about'))}</strong><span>${esc(t('prof.aboutDesc'))}</span></div>${ic('chevron', 18)}</button>
     <p class="muted small center">Istiqamah 40 · v${APP_VERSION} · <a href="privacy.html">${esc(t('prof.privacy'))}</a></p>`;
+}
+
+function pushCard() {
+  if (!window.Push || !Push.configured()) return '';
+  const head = (badge, ok) => `<div class="row-between"><h2 class="h-ico">${ic('bell', 18)} ${esc(t('push.title'))}</h2><span class="badge ${ok ? 'ok' : ''}">${esc(badge)}</span></div>`;
+  let body;
+  if (!Push.supported() || Push.iosNeedsInstall) body = `${head(t('push.off'))}<p class="muted small">${esc(t(Push.iosNeedsInstall ? 'push.ios' : 'push.unsupported'))}</p>`;
+  else if (!Sync.signedIn) body = `${head(t('push.off'))}<p class="muted small">${esc(t('push.needLogin'))}</p><button type="button" class="btn primary small-btn" data-tab="profile">${esc(t('push.toLogin'))}</button>`;
+  else if (Push.active) body = `${head(t('push.on'), true)}<p class="muted small">${esc(t('push.descOn'))}</p><button type="button" class="btn ghost small-btn" data-action="push-off" ${Push.busy ? 'disabled' : ''}>${esc(t('push.disable'))}</button>`;
+  else body = `${head(t('push.off'))}<p class="muted small">${esc(t('push.descOff'))}</p><button type="button" class="btn primary small-btn" data-action="push-on" ${Push.busy ? 'disabled' : ''}>${ic('bell', 16)} ${esc(t('push.enable'))}</button>`;
+  return `<section class="card push-card">${body}${Push.error ? `<p class="sync-err">${esc(Push.error)}</p>` : ''}</section>`;
 }
 
 function syncCard() {
@@ -890,7 +902,7 @@ async function onGoogleCredential(resp) {
     // Tarik data akun dulu, agar di HP kedua tanggal mulai & catatan lama langsung terpakai
     const ok = await Promise.race([Sync.signInWithGoogle(resp.credential), new Promise((r) => setTimeout(() => r(null), 12000))]);
     if (ok === false) toast(t('toast.syncFail'));
-    else if (ok) toast(t('toast.synced'));
+    else if (ok) { toast(t('toast.synced')); if (window.Push) await Push.refresh(); }
   }
   if (ui.screen === 'register') go(state.settings.startDate ? 'app' : 'setup');
   else render();
@@ -907,7 +919,9 @@ document.addEventListener('click', async (e) => {
 
   switch (a) {
     case 'lang':
-      s.lang = el.dataset.lang; save(); render(); break;
+      s.lang = el.dataset.lang; save(); render();
+      if (window.Push && Push.active) Push.refresh();
+      break;
     case 'theme':
       s.theme = el.dataset.id; save(); render(); break;
     case 'cover-start':
@@ -925,6 +939,7 @@ document.addEventListener('click', async (e) => {
     case 'logout':
       if (confirm(t('prof.logoutConfirm'))) {
         if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+        if (window.Push) await Push.disable();
         if (window.Sync) await Sync.signOut();
         state.profile = { provider: 'guest', name: '' }; save(); render(); toast(t('toast.signedOut'));
       }
@@ -994,7 +1009,9 @@ document.addEventListener('click', async (e) => {
     case 'show-amount':
       s.showAmount = !s.showAmount; save(); render(); break;
     case 'perm':
-      await Notification.requestPermission(); render(); break;
+      await Notification.requestPermission();
+      if (window.Push && Notification.permission === 'granted') await Push.refresh();
+      render(); break;
     case 'test':
       if (await ensurePermission()) notify(t('n.testTitle'), t('n.testBody'), 'test-' + Date.now());
       break;
@@ -1014,6 +1031,7 @@ document.addEventListener('click', async (e) => {
     case 'reset': {
       const cloud = window.Sync && Sync.signedIn;
       if (confirm(t(cloud ? 'prof.resetConfirmCloud' : 'prof.resetConfirm'))) {
+        if (window.Push) await Push.disable();
         if (cloud) {
           try { await Sync.deleteCloudData(); } catch (err) { toast(t('toast.syncFail')); break; }
           await Sync.signOut();
@@ -1025,6 +1043,14 @@ document.addEventListener('click', async (e) => {
       }
       break;
     }
+    case 'push-on':
+      render();
+      toast(await Push.enable() ? t('toast.pushOn') : t('toast.pushFail'));
+      render();
+      break;
+    case 'push-off':
+      await Push.disable(); toast(t('toast.pushOff')); render();
+      break;
     case 'sync-now':
       if (window.Sync) { Sync.syncNow(); render(); }
       break;
@@ -1185,6 +1211,7 @@ function eventsFor(d) {
 let lastCheck = null;
 function checkReminders() {
   if (ui.screen !== 'app' || !state.settings.startDate || !('Notification' in window) || Notification.permission !== 'granted') return;
+  if (window.Push && Push.active) return; // pengingat dikirim server lewat push
   const now = new Date();
   const d = ymd(now);
   const n = dayNum(d);
@@ -1209,7 +1236,7 @@ function checkReminders() {
 const HASH_TAB = { '#home': 'home', '#journey': 'journey', '#eval': 'eval', '#remind': 'remind', '#profile': 'profile' };
 if (HASH_TAB[location.hash]) ui.tab = HASH_TAB[location.hash];
 render();
-if (window.Sync) Sync.init().then(() => { if (ui.tab === 'profile') render(); });
+if (window.Sync) Sync.init().then(() => (window.Push ? Push.refresh() : null)).then(() => { if (ui.tab === 'profile' || ui.tab === 'remind') render(); });
 let lastDay = todayYmd();
 setInterval(() => {
   checkReminders();

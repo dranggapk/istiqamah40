@@ -3,6 +3,18 @@
 
 const I18N = {
   id: {
+    // — notifikasi push —
+    'push.title': 'Notifikasi push', 'push.on': 'Aktif', 'push.off': 'Mati',
+    'push.descOn': 'Pengingat dikirim dari server, sehingga tetap muncul walau aplikasi ditutup.',
+    'push.descOff': 'Aktifkan agar pengingat shalat, tilawah, dan sedekah tetap muncul walau aplikasi ditutup.',
+    'push.needLogin': 'Notifikasi push membutuhkan sinkronisasi cloud. Masuk dengan Google di menu Profil terlebih dahulu.',
+    'push.toLogin': 'Buka Profil',
+    'push.unsupported': 'Browser ini belum mendukung notifikasi push. Gunakan Chrome di Android, atau tambahkan pengingat ke kalender di bawah.',
+    'push.ios': 'Di iPhone, notifikasi push hanya tersedia setelah aplikasi ditambahkan ke Layar Utama (Safari › Bagikan › Tambah ke Layar Utama), lalu dibuka dari ikonnya.',
+    'push.enable': 'Aktifkan notifikasi push', 'push.disable': 'Matikan notifikasi push',
+    'push.backupTitle': 'Cadangan: kalender HP', 'push.backupBody': 'Opsional — tambahkan jadwal 40 hari ke kalender sebagai pengingat cadangan.',
+    'toast.pushOn': 'Notifikasi push aktif. Pengingat akan tetap muncul walau aplikasi ditutup.',
+    'toast.pushOff': 'Notifikasi push dimatikan.', 'toast.pushFail': 'Notifikasi push gagal diaktifkan.',
     // — sinkronisasi cloud —
     'sync.title': 'Sinkronisasi cloud', 'sync.on': 'Aktif', 'sync.off': 'Mati',
     'sync.descOff': 'Masuk dengan Google agar catatan ibadahmu tersimpan di akun, aman saat ganti HP, dan bisa dibuka di beberapa perangkat.',
@@ -272,6 +284,18 @@ const I18N = {
   },
 
   en: {
+    // — push notifications —
+    'push.title': 'Push notifications', 'push.on': 'On', 'push.off': 'Off',
+    'push.descOn': 'Reminders are sent from the server, so they still appear when the app is closed.',
+    'push.descOff': 'Turn this on so prayer, recitation, and charity reminders still appear when the app is closed.',
+    'push.needLogin': 'Push notifications need cloud sync. Sign in with Google from the Profile tab first.',
+    'push.toLogin': 'Open Profile',
+    'push.unsupported': 'This browser does not support push notifications yet. Use Chrome on Android, or add the reminders to your calendar below.',
+    'push.ios': 'On iPhone, push notifications are only available after you add the app to your Home Screen (Safari › Share › Add to Home Screen) and open it from the icon.',
+    'push.enable': 'Turn on push notifications', 'push.disable': 'Turn off push notifications',
+    'push.backupTitle': 'Backup: phone calendar', 'push.backupBody': 'Optional — add the 40-day schedule to your calendar as a backup reminder.',
+    'toast.pushOn': 'Push notifications are on. Reminders will appear even when the app is closed.',
+    'toast.pushOff': 'Push notifications are off.', 'toast.pushFail': 'Push notifications could not be turned on.',
     // — cloud sync —
     'sync.title': 'Cloud sync', 'sync.on': 'On', 'sync.off': 'Off',
     'sync.descOff': 'Sign in with Google to save your worship log to your account, keep it safe when you change phones, and open it on several devices.',
