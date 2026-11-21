@@ -1,5 +1,5 @@
 /* Service worker Istiqamah 40 — cache offline + klik notifikasi */
-const VERSION = 'istiqamah40-v7';
+const VERSION = 'istiqamah40-v8';
 const SHELL = [
   './', 'index.html', 'styles.css', 'config.js', 'i18n.js', 'icons.js', 'app.js', 'praytimes.js', 'sync.js', 'lib/supabase-js-2.49.4.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png', 'icons/badge-96.png',
