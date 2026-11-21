@@ -80,11 +80,24 @@ function load() {
   return { settings: { ...DEFAULT_SETTINGS, lang: defaultLang(), rem: { ...DEFAULT_SETTINGS.rem } }, days: {}, profile: null };
 }
 let state = load();
+let lastSettingsSnap = null;
+// Bahasa & tema tidak dihitung sebagai perubahan yang perlu disinkronkan
+function settingsSnap() { const { u, lang, theme, ...rest } = state.settings; return JSON.stringify(rest); }
+lastSettingsSnap = settingsSnap();
 const ui = { screen: null, tab: 'home', sub: null, viewDate: todayYmd(), selDay: null, coverFrom: null };
 
-function save() {
+function saveLocal() {
   try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) { toast(t('toast.saveFail')); }
 }
+// Simpan + tandai perubahan pengaturan untuk sinkronisasi cloud
+function save() {
+  const snap = settingsSnap();
+  if (snap !== lastSettingsSnap) { state.settings.u = Date.now(); if (window.Sync) Sync.markSettings(); }
+  lastSettingsSnap = snap;
+  saveLocal();
+  if (window.Sync) Sync.schedule();
+}
+function applySettings(s) { state.settings = s; lastSettingsSnap = settingsSnap(); }
 
 /* ================= Bahasa ================= */
 const missingKeys = new Set();
@@ -112,8 +125,11 @@ const itemName = (id) => {
 
 /* ================= Perhitungan ================= */
 const rec = (d) => state.days[d] || { done: {}, pages: 0, note: '' };
+// Dipanggil tepat sebelum catatan suatu hari diubah
 function ensureRec(d) {
   if (!state.days[d]) state.days[d] = { done: {}, pages: 0, note: '' };
+  state.days[d].u = Date.now();
+  if (window.Sync) Sync.markDay(d);
   return state.days[d];
 }
 function ensureSedekah(d) {
@@ -697,6 +713,7 @@ function viewProfile() {
     ${isGoogle ? `<button type="button" class="btn ghost wide" data-action="logout">${ic('logout', 18)} ${esc(t('prof.logout'))}</button>`
       : `<section class="card"><h2>${esc(t('prof.linkTitle'))}</h2><p class="muted small">${esc(t('prof.linkBody'))}</p>${googleButton()}</section>`}
 
+    ${syncCard()}
     <h3 class="group">${esc(t('prof.gPref'))}</h3>
     <section class="card list">
       <div class="srow"><span class="pill-icon sm shalat">${ic('globe', 18)}</span><div><strong>${esc(t('prof.lang'))}</strong><span>${esc(t('prof.langDesc'))}</span></div>${seg('lang', L(), [['id', 'ID'], ['en', 'EN']])}</div>
@@ -720,6 +737,33 @@ function viewProfile() {
 
     <button type="button" class="about" data-action="about">${logo(44, { rounded: true })}<div><strong>${esc(t('prof.about'))}</strong><span>${esc(t('prof.aboutDesc'))}</span></div>${ic('chevron', 18)}</button>
     <p class="muted small center">Istiqamah 40 · v${APP_VERSION} · <a href="privacy.html">${esc(t('prof.privacy'))}</a></p>`;
+}
+
+function syncCard() {
+  if (!window.Sync || !Sync.enabled()) return '';
+  const st = Sync.status;
+  const p = state.profile || {};
+  if (!Sync.signedIn) {
+    return `<section class="card sync-card">
+      <div class="row-between"><h2 class="h-ico">${ic('cloud', 18)} ${esc(t('sync.title'))}</h2><span class="badge">${esc(t('sync.off'))}</span></div>
+      <p class="muted small">${esc(t(p.provider === 'google' ? 'sync.descReconnect' : 'sync.descOff'))}</p>
+      ${p.provider === 'google' ? googleButton() : ''}
+      ${st.state === 'error' && st.error ? `<p class="sync-err">${esc(st.error)}</p>` : ''}
+    </section>`;
+  }
+  let line, cls = 'ok';
+  if (st.state === 'syncing') { line = t('sync.syncing'); cls = ''; }
+  else if (st.state === 'error') { line = t('sync.error'); cls = 'err'; }
+  else if (st.state === 'offline' || !navigator.onLine) { line = t('sync.offline'); cls = ''; }
+  else if (Sync.lastSync) line = t('sync.last', { time: new Intl.DateTimeFormat(locale(), { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(Sync.lastSync)) });
+  else { line = t('sync.never'); cls = ''; }
+  return `<section class="card sync-card">
+    <div class="row-between"><h2 class="h-ico">${ic('cloud', 18)} ${esc(t('sync.title'))}</h2><span class="badge ${cls === 'ok' ? 'ok' : ''}">${esc(t('sync.on'))}</span></div>
+    <p class="small sync-line ${cls}">${esc(line)}</p>
+    ${st.state === 'error' && st.error ? `<p class="sync-err">${esc(st.error)}</p>` : ''}
+    <p class="muted small">${esc(t('sync.descOn', { email: Sync.email }))}</p>
+    <button type="button" class="btn ghost small-btn" data-action="sync-now" ${st.state === 'syncing' ? 'disabled' : ''}>${ic('cloud', 16)} ${esc(t('sync.now'))}</button>
+  </section>`;
 }
 
 /* ================= Kerangka aplikasi ================= */
@@ -814,9 +858,12 @@ function loadGsi() {
 let gsiInited = false;
 function mountGoogleButton() {
   const holder = $('#gsi-btn');
-  loadGsi().then(() => {
+  loadGsi().then(async () => {
     if (!gsiInited) {
-      google.accounts.id.initialize({ client_id: APP_CONFIG.googleClientId, callback: onGoogleCredential, auto_select: false, ux_mode: 'popup' });
+      const nonce = window.Sync ? await Sync.nonceForGoogle() : undefined;
+      const opts = { client_id: APP_CONFIG.googleClientId, callback: onGoogleCredential, auto_select: false, ux_mode: 'popup' };
+      if (nonce) opts.nonce = nonce;
+      google.accounts.id.initialize(opts);
       gsiInited = true;
     }
     if (!document.body.contains(holder)) return;
@@ -833,15 +880,20 @@ function decodeJwt(token) {
   const bin = atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), '='));
   return JSON.parse(new TextDecoder().decode(Uint8Array.from(bin, (ch) => ch.charCodeAt(0))));
 }
-function onGoogleCredential(resp) {
-  try {
-    const p = decodeJwt(resp.credential);
-    state.profile = { provider: 'google', name: p.name || p.given_name || '', email: p.email || '', picture: p.picture || '', sub: p.sub };
-    save();
-    toast(t('toast.signedIn', { name: (p.given_name || p.name || '').trim() }));
-    if (ui.screen === 'register') go(state.settings.startDate ? 'app' : 'setup');
-    else render();
-  } catch (e) { toast(t('toast.signInFail')); }
+async function onGoogleCredential(resp) {
+  let p;
+  try { p = decodeJwt(resp.credential); } catch (e) { toast(t('toast.signInFail')); return; }
+  state.profile = { provider: 'google', name: p.name || p.given_name || '', email: p.email || '', picture: p.picture || '', sub: p.sub };
+  save();
+  toast(t('toast.signedIn', { name: (p.given_name || p.name || '').trim() }));
+  if (window.Sync && Sync.enabled()) {
+    // Tarik data akun dulu, agar di HP kedua tanggal mulai & catatan lama langsung terpakai
+    const ok = await Promise.race([Sync.signInWithGoogle(resp.credential), new Promise((r) => setTimeout(() => r(null), 12000))]);
+    if (ok === false) toast(t('toast.syncFail'));
+    else if (ok) toast(t('toast.synced'));
+  }
+  if (ui.screen === 'register') go(state.settings.startDate ? 'app' : 'setup');
+  else render();
 }
 
 /* ================= Aksi ================= */
@@ -873,6 +925,7 @@ document.addEventListener('click', async (e) => {
     case 'logout':
       if (confirm(t('prof.logoutConfirm'))) {
         if (window.google && google.accounts && google.accounts.id) google.accounts.id.disableAutoSelect();
+        if (window.Sync) await Sync.signOut();
         state.profile = { provider: 'guest', name: '' }; save(); render(); toast(t('toast.signedOut'));
       }
       break;
@@ -958,13 +1011,22 @@ document.addEventListener('click', async (e) => {
       downloadIcs(); break;
     case 'export':
       download(`istiqamah40-backup-${todayYmd()}.json`, JSON.stringify(state, null, 2), 'application/json'); break;
-    case 'reset':
-      if (confirm(t('prof.resetConfirm'))) {
+    case 'reset': {
+      const cloud = window.Sync && Sync.signedIn;
+      if (confirm(t(cloud ? 'prof.resetConfirmCloud' : 'prof.resetConfirm'))) {
+        if (cloud) {
+          try { await Sync.deleteCloudData(); } catch (err) { toast(t('toast.syncFail')); break; }
+          await Sync.signOut();
+        }
         localStorage.removeItem(STORE_KEY); localStorage.removeItem(FIRED_KEY);
         const lang = s.lang;
-        state = load(); state.settings.lang = lang;
+        state = load(); state.settings.lang = lang; lastSettingsSnap = settingsSnap();
         ui.viewDate = todayYmd(); ui.tab = 'home'; ui.sub = null; ui.screen = 'cover'; render();
       }
+      break;
+    }
+    case 'sync-now':
+      if (window.Sync) { Sync.syncNow(); render(); }
       break;
     default:
   }
@@ -1016,7 +1078,13 @@ document.addEventListener('change', (e) => {
       const data = JSON.parse(txt);
       if (!data.settings || !data.days) throw new Error('format');
       localStorage.setItem(STORE_KEY, JSON.stringify(data));
-      state = load(); ui.screen = null; render(); toast(t('toast.restored'));
+      state = load();
+      // Data pulihan dianggap perubahan terbaru agar ikut terkirim ke cloud
+      const now = Date.now();
+      Object.keys(state.days).forEach((d) => { state.days[d].u = now; if (window.Sync) Sync.markDay(d); });
+      state.settings.u = now; if (window.Sync) Sync.markSettings();
+      lastSettingsSnap = settingsSnap(); saveLocal(); if (window.Sync) Sync.schedule(300);
+      ui.screen = null; render(); toast(t('toast.restored'));
     }).catch(() => toast(t('toast.badBackup')));
   }
 });
@@ -1141,6 +1209,7 @@ function checkReminders() {
 const HASH_TAB = { '#home': 'home', '#journey': 'journey', '#eval': 'eval', '#remind': 'remind', '#profile': 'profile' };
 if (HASH_TAB[location.hash]) ui.tab = HASH_TAB[location.hash];
 render();
+if (window.Sync) Sync.init().then(() => { if (ui.tab === 'profile') render(); });
 let lastDay = todayYmd();
 setInterval(() => {
   checkReminders();
@@ -1158,6 +1227,7 @@ checkReminders();
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) return;
   checkReminders();
+  if (window.Sync) Sync.schedule(200);
   if (ui.tab !== 'home') ui.viewDate = todayYmd();
   if (!document.activeElement?.matches('textarea,input')) render();
 });

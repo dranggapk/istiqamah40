@@ -3,5 +3,9 @@
  * Tambahkan domain tempat aplikasi di-hosting ke "Authorized JavaScript origins".
  * Selama masih kosong, tombol Google menampilkan petunjuk dan pengguna tetap bisa lanjut tanpa akun. */
 window.APP_CONFIG = {
+  // Supabase (sinkronisasi cloud): Project Settings › API — Project URL & anon/publishable key.
+  // Kunci anon/publishable memang publik; keamanan data dijaga Row Level Security (supabase/schema.sql).
+  supabaseUrl: '',
+  supabaseAnonKey: '',
   googleClientId: '62506141379-vsp1pb5j9j9rfi3fmk6ff0t9849srick.apps.googleusercontent.com',
 };

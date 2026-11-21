@@ -34,6 +34,7 @@ const ICON_PATHS = {
   note: '<path d="M12 20.5h8.5"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/>',
   checkCircle: '<circle cx="12" cy="12" r="9"/><path d="m8 12.5 2.8 2.8L16.5 9.5"/>',
   halfClock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  cloud: '<path d="M7 19h10.5a4 4 0 0 0 .6-8 6 6 0 0 0-11.6 1.6A3.3 3.3 0 0 0 7 19Z"/>',
   stats: '<path d="M3 20.5h18"/><path d="M5 16l4.5-5 3.5 3 6-7.5"/><path d="M15 6.5h4v4"/>',
   // — pelengkap dengan gaya yang sama —
   shalat: '<path d="M3 21h18"/><path d="M5 21v-7.5a7 7 0 0 1 14 0V21"/><path d="M12 2.5v4"/><path d="M10 21v-3.5a2 2 0 0 1 4 0V21"/>',

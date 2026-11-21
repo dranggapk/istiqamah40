@@ -3,6 +3,15 @@
 
 const I18N = {
   id: {
+    // — sinkronisasi cloud —
+    'sync.title': 'Sinkronisasi cloud', 'sync.on': 'Aktif', 'sync.off': 'Mati',
+    'sync.descOff': 'Masuk dengan Google agar catatan ibadahmu tersimpan di akun, aman saat ganti HP, dan bisa dibuka di beberapa perangkat.',
+    'sync.descReconnect': 'Hubungkan ulang akun Google sekali untuk mengaktifkan sinkronisasi catatan ibadah ke cloud.',
+    'sync.descOn': 'Catatan tersimpan di cloud untuk {email}. Perubahan dikirim otomatis saat online.',
+    'sync.syncing': 'Menyinkronkan…', 'sync.error': 'Sinkronisasi gagal. Data tetap aman di perangkat ini.', 'sync.offline': 'Sedang offline. Perubahan akan dikirim saat online.',
+    'sync.last': 'Tersinkron · {time}', 'sync.never': 'Belum pernah disinkronkan', 'sync.now': 'Sinkronkan sekarang',
+    'toast.synced': 'Catatan tersinkron dengan cloud.', 'toast.syncFail': 'Sinkronisasi cloud gagal. Coba lagi nanti.',
+    'prof.resetConfirmCloud': 'Hapus semua catatan, pengaturan, dan profil — di perangkat ini DAN di cloud? Ini tidak bisa dibatalkan.',
     // — v4: beranda, rincian, perjalanan —
     'nav.home': 'Beranda', 'nav.journey': 'Perjalanan',
     heroSub: 'Mari jaga istiqamah hari ini.',
@@ -263,6 +272,15 @@ const I18N = {
   },
 
   en: {
+    // — cloud sync —
+    'sync.title': 'Cloud sync', 'sync.on': 'On', 'sync.off': 'Off',
+    'sync.descOff': 'Sign in with Google to save your worship log to your account, keep it safe when you change phones, and open it on several devices.',
+    'sync.descReconnect': 'Reconnect your Google account once to turn on cloud sync for your worship log.',
+    'sync.descOn': 'Your log is saved in the cloud for {email}. Changes are sent automatically when you are online.',
+    'sync.syncing': 'Syncing…', 'sync.error': 'Sync failed. Your data is still safe on this device.', 'sync.offline': 'You are offline. Changes will be sent when you are back online.',
+    'sync.last': 'Synced · {time}', 'sync.never': 'Not synced yet', 'sync.now': 'Sync now',
+    'toast.synced': 'Your log is synced with the cloud.', 'toast.syncFail': 'Cloud sync failed. Please try again later.',
+    'prof.resetConfirmCloud': 'Delete all logs, settings, and your profile — on this device AND in the cloud? This cannot be undone.',
     // — v4: home, details, journey —
     'nav.home': 'Home', 'nav.journey': 'Journey',
     heroSub: 'Let’s stay steadfast today.',

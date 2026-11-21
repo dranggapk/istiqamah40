@@ -25,7 +25,25 @@ Tanpa langkah ini, tombol Google hanya menampilkan petunjuk; pengguna tetap bisa
 4. Salin Client ID ke `config.js` → `googleClientId: '….apps.googleusercontent.com'`.
 5. Naikkan `VERSION` di `sw.js` agar perangkat mengambil versi baru.
 
-Catatan: login Google saat ini dipakai untuk **identitas** (nama, email, foto). Catatan ibadah tetap tersimpan di perangkat. Sinkronisasi antarperangkat butuh backend (mis. Firebase/Supabase) — bisa jadi tahap berikutnya.
+Login Google dipakai untuk identitas (nama, email, foto) dan — bila Supabase dikonfigurasi — untuk sinkronisasi cloud (lihat bagian di bawah).
+
+## Sinkronisasi cloud (Supabase)
+Catatan ibadah & pengaturan disimpan per akun Google, sehingga aman saat ganti HP dan bisa dibuka di beberapa perangkat. Data lokal tetap menjadi sumber utama — aplikasi berjalan offline dan mengirim perubahan saat online. Bahasa & tema tidak disinkronkan (pilihan per perangkat).
+
+**Cara kerja**
+- Login Google (Google Identity Services) → token diteruskan ke Supabase Auth (`signInWithIdToken` + nonce). Pengguna hanya login sekali.
+- Tabel `user_settings` (1 baris/pengguna) dan `day_logs` (1 baris/tanggal), dilindungi Row Level Security: setiap pengguna hanya bisa membaca & menulis datanya sendiri.
+- Konflik diselesaikan per tanggal: perubahan yang terakhir dibuat yang dipakai.
+- Profil › "Hapus semua data" ikut menghapus data di cloud.
+
+**Setup**
+1. Buat project di https://supabase.com (region Singapore paling dekat).
+2. SQL Editor › New query › tempel isi `supabase/schema.sql` › Run.
+3. Authentication › Sign In / Providers › **Google** › Enable. Isi **Client IDs** dengan Google Client ID yang sama seperti di `config.js`. Biarkan "Skip nonce checks" **mati**. Save.
+4. Project Settings › API (atau API Keys): salin **Project URL** dan **anon / publishable key** ke `config.js` (`supabaseUrl`, `supabaseAnonKey`). Jangan pernah memakai *service_role / secret key* di aplikasi.
+5. Naikkan `VERSION` di `sw.js`, lalu push.
+
+Library: `lib/supabase-js-2.49.4.js` (supabase-js UMD, lisensi MIT) disimpan di repo agar bisa di-cache offline.
 
 ## Bahasa
 Semua teks ada di `i18n.js` (`id` dan `en`, kunci identik). Untuk menambah bahasa, salin blok `en`, terjemahkan, lalu tambahkan pilihannya di layar registrasi dan Profil.

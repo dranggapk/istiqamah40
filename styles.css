@@ -540,3 +540,12 @@ dialog::backdrop { background: rgba(10,16,13,.6); }
 .ach.on strong { color: var(--ink); }
 .ach.on .ach-ico { background: var(--tilawah); color: #fff; }
 .cell.perfect svg { width: 20px; height: 20px; }
+
+/* Sinkronisasi cloud */
+.sync-card .h-ico svg { color: var(--shalat); }
+.sync-line { font-weight: 700; color: var(--muted); }
+.sync-line.ok { color: var(--shalat); }
+.sync-line.err { color: var(--sedekah-text); }
+.sync-err { font-size: 12px; color: var(--sedekah-text); background: var(--sedekah-soft); border-radius: 10px; padding: 8px 10px; word-break: break-word; }
+.sync-card .btn { align-self: flex-start; }
+.sync-card .btn[disabled] { opacity: .6; cursor: progress; }
