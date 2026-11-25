@@ -1,5 +1,6 @@
--- Istiqamah 40 — notifikasi push (jalankan SETELAH schema.sql)
+-- Istiqamah 40 — notifikasi push, LANGKAH 1: tabel (jalankan SETELAH schema.sql)
 -- SQL Editor › New query › tempel › Run. Aman dijalankan ulang.
+-- Langkah 2 (penjadwal) ada di push-cron.sql.
 
 -- Alamat penerima push per perangkat
 create table if not exists public.push_subscriptions (
@@ -34,22 +35,5 @@ create table if not exists public.push_log (
 alter table public.push_log enable row level security;   -- tanpa policy: tertutup untuk pengguna
 revoke all on public.push_log from anon, authenticated;
 
--- Bersihkan log lama setiap hari
-create extension if not exists pg_cron;
-create extension if not exists pg_net;
-
-select cron.unschedule(jobid) from cron.job where jobname in ('istiqamah40-reminders', 'istiqamah40-cleanup');
-
-select cron.schedule('istiqamah40-cleanup', '17 3 * * *',
-  $$ delete from public.push_log where sent_at < now() - interval '3 days' $$);
-
--- Panggil Edge Function setiap menit.
--- Ganti <PROJECT_REF> dan <CRON_SECRET> (lihat berkas rahasia yang diberikan terpisah — JANGAN di-commit).
-select cron.schedule('istiqamah40-reminders', '* * * * *', $$
-  select net.http_post(
-    url := 'https://<PROJECT_REF>.supabase.co/functions/v1/send-reminders',
-    headers := jsonb_build_object('Content-Type', 'application/json', 'x-cron-secret', '<CRON_SECRET>'),
-    body := '{}'::jsonb,
-    timeout_milliseconds := 25000
-  )
-$$);
+-- Segarkan schema cache API agar tabel baru langsung dikenali aplikasi
+notify pgrst, 'reload schema';

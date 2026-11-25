@@ -55,7 +55,7 @@ Pengingat dikirim dari server sehingga tetap muncul walau aplikasi ditutup. Memb
 - iPhone: hanya setelah aplikasi ditambahkan ke Layar Utama (iOS 16.4+).
 
 **Setup** (kunci rahasia diberikan terpisah — JANGAN di-commit)
-1. SQL Editor › jalankan `supabase/push.sql` (ganti `<PROJECT_REF>` dan `<CRON_SECRET>` di bagian akhir).
+1. SQL Editor › jalankan `supabase/push.sql` (tabel). Lalu query baru › jalankan `supabase/push-cron.sql` (penjadwal; ganti `<PROJECT_REF>` dan `<CRON_SECRET>`).
 2. Edge Functions › Deploy a new function › Via Editor › nama **`send-reminders`** › tempel isi `supabase/functions/send-reminders/index.ts` › Deploy.
 3. Buka fungsi itu › Details/Settings › matikan **Verify JWT (Enforce JWT verification)** › Save.
 4. Edge Functions › Secrets: tambahkan `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`, `VAPID_SUBJECT`, `CRON_SECRET`.

@@ -32,7 +32,14 @@ const Push = (() => {
       endpoint: j.endpoint, user_id: Sync.userId, p256dh: j.keys.p256dh, auth: j.keys.auth,
       tz: tz(), lang: state.settings.lang === 'en' ? 'en' : 'id', updated_at: new Date().toISOString(),
     }, { onConflict: 'endpoint' });
-    if (error) throw error;
+    if (error) throw friendly(error);
+  }
+  // Ubah error teknis Supabase menjadi pesan yang bisa ditindaklanjuti
+  function friendly(err) {
+    const msg = String((err && err.message) || err);
+    if ((err && err.code === 'PGRST205') || /schema cache|does not exist/i.test(msg)) return new Error(t('push.notReady'));
+    if (/row-level security|permission denied/i.test(msg)) return new Error(t('push.denied'));
+    return err;
   }
 
   /** Dipanggil saat aplikasi dibuka, setelah login, dan saat bahasa diganti.
